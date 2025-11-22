@@ -82,7 +82,7 @@ DataGrid的`Description Column`的可见性绑定到依赖属性`IsDescriptionCo
 
 减少冒泡&隧道路由事件订阅次数的同时，还能将事件处理程序从XAML Code Behind 转移到 ViewModel，让代码更符合MVVM规范。
 
-**烂代码**
+**Bad Code**
 
 ```xaml
 <StackPanel
