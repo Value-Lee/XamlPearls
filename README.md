@@ -257,43 +257,65 @@ internal class MainWindowViewModel
 
 # LambdaConverters
 
-# Lambda Converters [![NuGet](https://img.shields.io/nuget/v/LambdaConverters.svg)](https://www.nuget.org/packages/LambdaConverters) [![ReSharper Extension](https://img.shields.io/resharper/v/LambdaConverters.Annotations.svg?label=ReSharper%20Extension)](https://plugins.jetbrains.com/plugin/11659-lambda-converters-annotations)
+
 
 The library allows to create `IValueConverter`, `IMultiValueConverter`, `DataTemplateSelector`, and `ValidationRule` objects with the most convenient syntax available, ideally, using the lambda expressions.
 
-## Lambda Value Converters
+## IValueConverters
 
-First create a (static) class and define your converters as static fields (or properties):
+First define your converters as static fields (or properties) in UserControl class:
 
 ```csharp
-internal static class Converters
+public partial class MainWindow : Window
 {
-    public static readonly IValueConverter VisibleIfTrue =
-        ValueConverter.Create<bool, Visibility>(e => e.Value ? Visibility.Visible : Visibility.Collapsed);
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
 
-    public static readonly IValueConverter VisibleIfNotNull =
-        ValueConverter.Create<object, Visibility>(e => e.Value != null ? Visibility.Visible : Visibility.Collapsed);
-
-    public static readonly IValueConverter ToUpperCase =
-        ValueConverter.Create<string, string>(e => e.Value.ToUpper());
+    public static readonly IValueConverter VisibleIfTrue = ValueConverter.Create<bool, Visibility>(
+        e => e.Value ? Visibility.Visible : Visibility.Collapsed);
 }
+
 ```
 
-You're done! Just reference the converters with the `x:Static` expressions from your XAML files (assuming that `c` is the namespace definition for the `Converters` class):
+You're done! Just reference the converters with the `x:Static` expressions from your XAML files:
 
 ```xml
-<Button Visibility="{Binding model.IsAvailable, Converter={x:Static c:Converters.VisibleIfTrue}}" />
-
-<TextBlock Text="{Binding model.Heading, Converter={x:Static c:Converters.ToUpperCase}}" />
+<Button Visibility="{Binding model.IsAvailable, Converter={x:Static local:MainWindow.VisibleIfTrue}}" />
 ```
 
-### Features
+**Features**
+
 - *strongly-typed* converters
 - resource declaration not needed, just use the `x:Static` expressions
 - separate class for each converter not needed anymore
 - no redundant declarations: if you do not need the `ConvertBack` method, don't define it; otherwise, just put the second lambda expression
 - full support for the remaining parameters of the `Convert` and `ConvertBack` methods: the `culture` and the `parameter` (also strongly-typed) are accessible as well
 - if the conversion fails due to unexpected value types the optional [error strategy](Sources/LambdaConverters.Wpf/ConverterErrorStrategy.cs) can be specified
+
+## IMultiValueConverter
+
+```c#
+public static readonly IMultiValueConverter PipeLineFlowRate = MultiValueConverter.Create<object[], double>(
+    e =>
+    {
+        double flowRate = 0.0;
+        bool isValve1Open = System.Convert.ToBoolean(e.Values[0]);
+        if (isValve1Open)
+        {
+            flowRate += 1.0;
+        }
+        bool isValve2Open = System.Convert.ToBoolean(e.Values[1]);
+        if (isValve2Open)
+        {
+            flowRate += 1.0;
+        }
+        return flowRate;
+    });
+```
+
+
 
 ## Lambda Data Template Selectors
 
@@ -329,7 +351,8 @@ Use your Lambda DataTemplateSelectors by referencing it with the `x:Static` mark
 
 Tada! All even numbers from `IntNumbers` are displayed with black font and white background and the odd numbers get the inverse font and background colors.
 
-### Features
+**Features**
+
 - *strongly-typed* Selectors
 - resource declaration not needed, just use the `x:Static` expressions
 - separate class for each selector not needed anymore
@@ -363,19 +386,9 @@ And then reference your new rule in vour `View` (assuming that `r` is the namesp
 ```
 Now, you made sure that only strings which consists of digits are passed to your `ViewModel`.
 
-### Features
+**Features**
+
 - *strongly-typed* rules
 - resource declaration not needed, just use the `x:Static` expressions
 - separate class for each rule not needed anymore
 - full support for the remaining parameter `culture`
-
-## Installation
-Use the NuGet package manager to install the package.
-
-:bulb: *ReSharper users*: use the Extension Manager to install the external annotations for the library.
-
-## Limitations
-The library currently supports the WPF only.
-
-## Bugs? Questions? Suggestions?
-Please feel free to [report them](https://github.com/michael-damatov/lambda-converters/issues).
