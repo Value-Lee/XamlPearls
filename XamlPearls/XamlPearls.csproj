@@ -43,4 +43,7 @@
 	<ItemGroup>
 	  <Resource Include="XamlFont\resources\colorfont_icon.png" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="LambdaConverters\" />
+	</ItemGroup>
 </Project>
